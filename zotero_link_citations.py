@@ -165,7 +165,7 @@ def find_citation_blocks(text: str) -> list[tuple]:
 # ─── Zotero SQLite database ───────────────────────────────────────────────
 
 class ZoteroDB:
-    def __init__(self, db_path: str, library_id: int | None = None):
+    def __init__(self, db_path: str, library_ids: list[int] | None = None):
         path = Path(db_path).expanduser()
         if not path.exists():
             raise FileNotFoundError(f"Zotero database not found: {path}")
@@ -178,11 +178,11 @@ class ZoteroDB:
             print(f"\nError: cannot open Zotero database ({e})")
             print("→ Please close the Zotero app and try again.")
             sys.exit(1)
-        self.library_id = library_id
+        self.library_ids = library_ids or []
         self._cache: dict = {}
         print(f"  Zotero DB: {path}")
-        if library_id:
-            print(f"  Library ID: {library_id}")
+        if self.library_ids:
+            print(f"  Library IDs: {', '.join(str(i) for i in self.library_ids)}")
 
     @staticmethod
     def list_libraries(db_path: str) -> list[dict]:
@@ -217,10 +217,10 @@ class ZoteroDB:
         if key in self._cache:
             return self._cache[key]
 
-        lib_filter = "AND i.libraryID = ?" if self.library_id else ""
+        lib_filter = f"AND i.libraryID IN ({','.join('?' * len(self.library_ids))})" if self.library_ids else ""
         params = [f"%{year}%"]
-        if self.library_id:
-            params.append(self.library_id)
+        if self.library_ids:
+            params.extend(self.library_ids)
 
         query = f"""
             SELECT DISTINCT i.itemID, i.key AS zotero_key, i.libraryID,
@@ -1026,10 +1026,14 @@ def interactive_choice(ref: dict, candidates: list[dict], full_text: str,
     lines_printed += 1
     if para_comments:
         for c in para_comments:
-            print(f"  💬 {c}")
+            print( )
+            print(f"  !!Comments: {c}")
+            print( )
             lines_printed += 1
     else:
-        print(f"  💬 No comment detected")
+        print( )
+        print(f"  !!Comments: No comment detected")
+        print( )
         lines_printed += 1
     print(f"  Homonym: {author} et al., {year}")
     lines_printed += 1
@@ -1668,26 +1672,48 @@ def ask_parameters() -> dict:
     return {"docx_path": docx_path, "db_path": db_path, "out_path": out_path}
 
 
-def pick_library(db_path: Path) -> int | None:
+DEFAULT_LIBRARY_NAME = "WGI AR7 General"
+
+
+def pick_library(db_path: Path) -> list[int]:
+    """
+    Always include the 'WGI AR7 General' library. Ask the user to choose one
+    additional library from the remaining list. Selecting "all libraries" is
+    not supported.
+    """
     libs = ZoteroDB.list_libraries(str(db_path))
     if not libs:
-        print("No libraries found.")
-        return None
+        print(f"\nError: no libraries found in the Zotero database.")
+        sys.exit(1)
 
-    print("\nAvailable libraries:")
-    for lib in libs:
+    default_lib = next(
+        (l for l in libs if l["name"].strip().lower() == DEFAULT_LIBRARY_NAME.lower()),
+        None,
+    )
+    if default_lib is None:
+        print(f"\nError: required library '{DEFAULT_LIBRARY_NAME}' not found in the Zotero database.")
+        print("→ Make sure this library exists and is accessible, then try again.")
+        sys.exit(1)
+
+    print(f"\nDefault library: [{default_lib['libraryID']}] {default_lib['name']}  ({default_lib['type']})")
+
+    other_libs = [l for l in libs if l["libraryID"] != default_lib["libraryID"]]
+    if not other_libs:
+        print("No additional libraries available; using only the default library.\n")
+        return [default_lib["libraryID"]]
+
+    print("\nChoose an additional library:")
+    for lib in other_libs:
         print(f"  [{lib['libraryID']}] {lib['name']}  ({lib['type']})")
 
     while True:
         try:
-            choice = input("\n  Library ID (Enter = all): ").strip()
-            if choice == "":
-                return None
+            choice = input("\n  Additional library ID: ").strip()
             lib_id = int(choice)
-            if any(l["libraryID"] == lib_id for l in libs):
-                name = next(l["name"] for l in libs if l["libraryID"] == lib_id)
-                print(f"  → {name}\n")
-                return lib_id
+            match = next((l for l in other_libs if l["libraryID"] == lib_id), None)
+            if match:
+                print(f"  → {match['name']}\n")
+                return [default_lib["libraryID"], lib_id]
         except (ValueError, KeyboardInterrupt):
             pass
         print("  Invalid ID.")
@@ -1753,13 +1779,13 @@ def main():
     db_path   = params["db_path"]
     out_path  = params["out_path"]
 
-    library_id  = pick_library(db_path)
+    library_ids = pick_library(db_path)
     homo_mode   = ask_memo_mode()
     show_linked = ask_show_linked()
 
     print("─" * 60)
 
-    db  = ZoteroDB(str(db_path), library_id)
+    db  = ZoteroDB(str(db_path), library_ids)
     doc = Document(str(docx_path))
 
     # Load comments from the docx (word/comments.xml) for display during homonym choice

@@ -1,6 +1,10 @@
 # zotero_link_citations.py
 
-Replaces "manually typed" citations in a `.docx` document with native Zotero fields, using your local Zotero SQLite database. You should close your local Zotero App before running the script. After running the script, open your local Zotero App and the output file in Word with the Zotero plugin, verify your citation style and click **Refresh**.
+Replaces "manually typed" citations in a `.docx` document with native Zotero fields, using your local Zotero SQLite database. 
+
+You should close your input file before running the script otherwise you get an error message saying that ' Package not found at *.docx'. Your local Zotero app should be closed before the code finishes otherwise your linking might crush after spending hours working on it. 
+
+After running the script, open your local Zotero App and the output file in Word with the Zotero plugin, verify your citation style and click **Add/Edit Bibliography**.
 
 ---
 
@@ -32,10 +36,10 @@ The script is fully interactive: it will ask for all parameters at startup.
 
 | Prompt | Description |
 |---|---|
-| **Source.docx** | Path to your input Word document. Paths with spaces are supported. |
+| **Source.docx** | Your input Word document with the path if you are not running from the folder where the document is in. Paths with spaces are supported. |
 | **Zotero database** | Path to `zotero.sqlite`. Auto-detected if found in `~/Zotero/`. |
 | **Output.docx** | Path for the output file. Will not overwrite an existing file. |
-| **Library** | Which Zotero library to search (you should use your Chapter Library). Lists all available; press Enter to search all. |
+| **Library** | Which Zotero library to search. The 'WGI AR7 General' library is selected by default. You need to choose your Chapter Library as the additional library. |
 | **Homonym handling** | What to do when a citation matches multiple Zotero entries. |
 | **Show citations** | Whether to print each linked citation in the terminal as it is processed. It seems that it shows the quotes in all cases. |
 
@@ -92,6 +96,6 @@ For `REF: MULTI CHOICE`, a Word comment listing all candidate Zotero entries is 
 Open the output file in Word with the Zotero plugin, then:
 
 1. Click **Zotero → Document Preferences** and select your citation style.
-2. Click **Refresh** to reformat all citations.
+2. Click **Add/Edit Bibliography** to reformat all citations.
 
 Red citations (`REF: NOT FOUND` or `REF: MULTI CHOICE`) must be resolved manually: either add the missing reference to your Zotero library and re-run the script, or replace the red text with a Zotero citation directly in Word.
