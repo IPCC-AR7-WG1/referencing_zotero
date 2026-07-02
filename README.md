@@ -96,6 +96,6 @@ For `REF: MULTI CHOICE`, a Word comment listing all candidate Zotero entries is 
 Open the output file in Word with the Zotero plugin, then:
 
 1. Click **Zotero → Document Preferences** and select your citation style.
-2. Click **Add/Edit Bibliography** to reformat all citations.
+2. Click **Add/Edit Bibliography** to generate a reference list or **Refresh** to reformat all citations and the existing reference list.
 
 Red citations (`REF: NOT FOUND` or `REF: MULTI CHOICE`) must be resolved manually: either add the missing reference to your Zotero library and re-run the script, or replace the red text with a Zotero citation directly in Word.
