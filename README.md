@@ -1,3 +1,11 @@
+This repository is home for IPCC WGI Zotero utilities:
+  - the Citation Style Language file 'intergovernmental-panel-on-climate-change-vX.csl'
+  - a python script which links Word citations to Zotero, named 'zotero_link_citations.py'
+
+# intergovernmental-panel-on-climate-change-vX.csl
+
+Please refer to the [Author Portal Zotero User Guide](https://smu.sharepoint.com/:b:/r/teams/ipccwg1-ar7/Shared%20Documents/01.%20Resources/06.%20AR7%20WGI%20Tools/03.%20Zotero/03.Zotero%20User%20Guide%20v1.2.pdf?csf=1&web=1&e=G31fi0) on how to install the CSL file.
+
 # zotero_link_citations.py
 
 Replaces "manually typed" citations in a `.docx` document with native Zotero fields, using your local Zotero SQLite database. 
