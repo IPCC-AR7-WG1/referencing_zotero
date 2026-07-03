@@ -1,6 +1,6 @@
 This repository is home for IPCC WGI Zotero utilities:
   - the Citation Style Language file 'intergovernmental-panel-on-climate-change-vX.csl'
-  - a python script which links Word citations to Zotero, named 'zotero_link_citations.py'
+  - a python script which links Word citations to Zotero, named 'zotero_link_citations.py' (developed by Octave Tessiot and maintained by Maxime Chamnonnet and Yongmei Gong)
 
 # intergovernmental-panel-on-climate-change-vX.csl
 
